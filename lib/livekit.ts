@@ -5,6 +5,6 @@ export async function createToken(identity: string, canPublish: boolean, room: s
   const secret = process.env.LIVEKIT_API_SECRET;
   if (!key || !secret) throw new Error("LiveKit is not configured");
   const token = new AccessToken(key, secret, { identity, ttl: "2h" });
-  token.addGrant({ roomJoin: true, room: `uc8-${room}`, canPublish, canSubscribe: true, canPublishData: false });
+  token.addGrant({ roomJoin: true, room: `uc8-${room}`, canPublish, canPublishSources: canPublish ? undefined : [], canSubscribe: true, canPublishData: false });
   return token.toJwt();
 }

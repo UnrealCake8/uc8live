@@ -1,2 +1,3 @@
-import { Viewer } from "@/components/Viewer";
-export default function LivePage(){ return <Viewer/> }
+import { Browse } from "@/components/Browse";
+
+export default function LivePage() { return <Browse />; }

@@ -1,6 +1,6 @@
 # uc8Live
 
-A lightweight LiveKit-powered livestream room. Invited creators publish camera and microphone; viewers can watch, react, and chat without creating an account.
+A lightweight, multi-room LiveKit streaming platform. Viewers can browse channels and join a stream without creating an account; invited creators choose a room and publish camera and microphone.
 
 ## Setup
 

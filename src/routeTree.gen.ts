@@ -18,6 +18,7 @@ import { Route as CreatorBroadcastsRouteImport } from './routes/creator/broadcas
 import { Route as CreatorChannelRouteImport } from './routes/creator/channel'
 import { Route as CreatorSettingsRouteImport } from './routes/creator/settings'
 import { Route as CreatorStreamRouteImport } from './routes/creator/stream'
+import { Route as CreatorVerificationRouteImport } from './routes/creator/verification'
 import { Route as LiveIndexRouteImport } from './routes/live/index'
 import { Route as LiveChannelSlugRouteImport } from './routes/live/$channelSlug'
 import { Route as ApiBroadcastsBroadcastIdRouteImport } from './routes/api/broadcasts/$broadcastId'
@@ -25,6 +26,8 @@ import { Route as ApiChannelsIndexRouteImport } from './routes/api/channels/inde
 import { Route as ApiChannelsCredentialsRouteImport } from './routes/api/channels/credentials'
 import { Route as ApiChannelsEnabledRouteImport } from './routes/api/channels/enabled'
 import { Route as ApiChannelsMineRouteImport } from './routes/api/channels/mine'
+import { Route as ApiIdentitySessionRouteImport } from './routes/api/identity/session'
+import { Route as ApiWebhooksDiditRouteImport } from './routes/api/webhooks/didit'
 import { Route as ApiWebhooksMuxRouteImport } from './routes/api/webhooks/mux'
 import { Route as ApiPublicChannelSlugRouteImport } from './routes/api/public/channel/$slug'
 
@@ -73,6 +76,11 @@ const CreatorStreamRoute = CreatorStreamRouteImport.update({
   path: '/creator/stream',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CreatorVerificationRoute = CreatorVerificationRouteImport.update({
+  id: '/creator/verification',
+  path: '/creator/verification',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LiveIndexRoute = LiveIndexRouteImport.update({
   id: '/live/',
   path: '/live/',
@@ -109,6 +117,16 @@ const ApiChannelsMineRoute = ApiChannelsMineRouteImport.update({
   path: '/api/channels/mine',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiIdentitySessionRoute = ApiIdentitySessionRouteImport.update({
+  id: '/api/identity/session',
+  path: '/api/identity/session',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiWebhooksDiditRoute = ApiWebhooksDiditRouteImport.update({
+  id: '/api/webhooks/didit',
+  path: '/api/webhooks/didit',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiWebhooksMuxRoute = ApiWebhooksMuxRouteImport.update({
   id: '/api/webhooks/mux',
   path: '/api/webhooks/mux',
@@ -129,6 +147,7 @@ export interface FileRoutesByFullPath {
   '/creator/channel': typeof CreatorChannelRoute
   '/creator/settings': typeof CreatorSettingsRoute
   '/creator/stream': typeof CreatorStreamRoute
+  '/creator/verification': typeof CreatorVerificationRoute
   '/live/$channelSlug': typeof LiveChannelSlugRoute
   '/creator/': typeof CreatorIndexRoute
   '/live/': typeof LiveIndexRoute
@@ -136,6 +155,8 @@ export interface FileRoutesByFullPath {
   '/api/channels/credentials': typeof ApiChannelsCredentialsRoute
   '/api/channels/enabled': typeof ApiChannelsEnabledRoute
   '/api/channels/mine': typeof ApiChannelsMineRoute
+  '/api/identity/session': typeof ApiIdentitySessionRoute
+  '/api/webhooks/didit': typeof ApiWebhooksDiditRoute
   '/api/webhooks/mux': typeof ApiWebhooksMuxRoute
   '/api/channels/': typeof ApiChannelsIndexRoute
   '/api/public/channel/$slug': typeof ApiPublicChannelSlugRoute
@@ -149,6 +170,7 @@ export interface FileRoutesByTo {
   '/creator/channel': typeof CreatorChannelRoute
   '/creator/settings': typeof CreatorSettingsRoute
   '/creator/stream': typeof CreatorStreamRoute
+  '/creator/verification': typeof CreatorVerificationRoute
   '/live/$channelSlug': typeof LiveChannelSlugRoute
   '/creator': typeof CreatorIndexRoute
   '/live': typeof LiveIndexRoute
@@ -156,6 +178,8 @@ export interface FileRoutesByTo {
   '/api/channels/credentials': typeof ApiChannelsCredentialsRoute
   '/api/channels/enabled': typeof ApiChannelsEnabledRoute
   '/api/channels/mine': typeof ApiChannelsMineRoute
+  '/api/identity/session': typeof ApiIdentitySessionRoute
+  '/api/webhooks/didit': typeof ApiWebhooksDiditRoute
   '/api/webhooks/mux': typeof ApiWebhooksMuxRoute
   '/api/channels': typeof ApiChannelsIndexRoute
   '/api/public/channel/$slug': typeof ApiPublicChannelSlugRoute
@@ -170,6 +194,7 @@ export interface FileRoutesById {
   '/creator/channel': typeof CreatorChannelRoute
   '/creator/settings': typeof CreatorSettingsRoute
   '/creator/stream': typeof CreatorStreamRoute
+  '/creator/verification': typeof CreatorVerificationRoute
   '/live/$channelSlug': typeof LiveChannelSlugRoute
   '/creator/': typeof CreatorIndexRoute
   '/live/': typeof LiveIndexRoute
@@ -177,6 +202,8 @@ export interface FileRoutesById {
   '/api/channels/credentials': typeof ApiChannelsCredentialsRoute
   '/api/channels/enabled': typeof ApiChannelsEnabledRoute
   '/api/channels/mine': typeof ApiChannelsMineRoute
+  '/api/identity/session': typeof ApiIdentitySessionRoute
+  '/api/webhooks/didit': typeof ApiWebhooksDiditRoute
   '/api/webhooks/mux': typeof ApiWebhooksMuxRoute
   '/api/channels/': typeof ApiChannelsIndexRoute
   '/api/public/channel/$slug': typeof ApiPublicChannelSlugRoute
@@ -192,6 +219,7 @@ export interface FileRouteTypes {
     | '/creator/channel'
     | '/creator/settings'
     | '/creator/stream'
+    | '/creator/verification'
     | '/live/$channelSlug'
     | '/creator/'
     | '/live/'
@@ -199,6 +227,8 @@ export interface FileRouteTypes {
     | '/api/channels/credentials'
     | '/api/channels/enabled'
     | '/api/channels/mine'
+    | '/api/identity/session'
+    | '/api/webhooks/didit'
     | '/api/webhooks/mux'
     | '/api/channels/'
     | '/api/public/channel/$slug'
@@ -212,6 +242,7 @@ export interface FileRouteTypes {
     | '/creator/channel'
     | '/creator/settings'
     | '/creator/stream'
+    | '/creator/verification'
     | '/live/$channelSlug'
     | '/creator'
     | '/live'
@@ -219,6 +250,8 @@ export interface FileRouteTypes {
     | '/api/channels/credentials'
     | '/api/channels/enabled'
     | '/api/channels/mine'
+    | '/api/identity/session'
+    | '/api/webhooks/didit'
     | '/api/webhooks/mux'
     | '/api/channels'
     | '/api/public/channel/$slug'
@@ -232,6 +265,7 @@ export interface FileRouteTypes {
     | '/creator/channel'
     | '/creator/settings'
     | '/creator/stream'
+    | '/creator/verification'
     | '/live/$channelSlug'
     | '/creator/'
     | '/live/'
@@ -239,6 +273,8 @@ export interface FileRouteTypes {
     | '/api/channels/credentials'
     | '/api/channels/enabled'
     | '/api/channels/mine'
+    | '/api/identity/session'
+    | '/api/webhooks/didit'
     | '/api/webhooks/mux'
     | '/api/channels/'
     | '/api/public/channel/$slug'
@@ -253,6 +289,7 @@ export interface RootRouteChildren {
   CreatorChannelRoute: typeof CreatorChannelRoute
   CreatorSettingsRoute: typeof CreatorSettingsRoute
   CreatorStreamRoute: typeof CreatorStreamRoute
+  CreatorVerificationRoute: typeof CreatorVerificationRoute
   LiveChannelSlugRoute: typeof LiveChannelSlugRoute
   CreatorIndexRoute: typeof CreatorIndexRoute
   LiveIndexRoute: typeof LiveIndexRoute
@@ -260,6 +297,8 @@ export interface RootRouteChildren {
   ApiChannelsCredentialsRoute: typeof ApiChannelsCredentialsRoute
   ApiChannelsEnabledRoute: typeof ApiChannelsEnabledRoute
   ApiChannelsMineRoute: typeof ApiChannelsMineRoute
+  ApiIdentitySessionRoute: typeof ApiIdentitySessionRoute
+  ApiWebhooksDiditRoute: typeof ApiWebhooksDiditRoute
   ApiWebhooksMuxRoute: typeof ApiWebhooksMuxRoute
   ApiChannelsIndexRoute: typeof ApiChannelsIndexRoute
   ApiPublicChannelSlugRoute: typeof ApiPublicChannelSlugRoute
@@ -330,6 +369,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CreatorStreamRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/creator/verification': {
+      id: '/creator/verification'
+      path: '/creator/verification'
+      fullPath: '/creator/verification'
+      preLoaderRoute: typeof CreatorVerificationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/live/': {
       id: '/live/'
       path: '/live'
@@ -379,6 +425,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiChannelsMineRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/identity/session': {
+      id: '/api/identity/session'
+      path: '/api/identity/session'
+      fullPath: '/api/identity/session'
+      preLoaderRoute: typeof ApiIdentitySessionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/webhooks/didit': {
+      id: '/api/webhooks/didit'
+      path: '/api/webhooks/didit'
+      fullPath: '/api/webhooks/didit'
+      preLoaderRoute: typeof ApiWebhooksDiditRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/webhooks/mux': {
       id: '/api/webhooks/mux'
       path: '/api/webhooks/mux'
@@ -405,6 +465,7 @@ const rootRouteChildren: RootRouteChildren = {
   CreatorChannelRoute: CreatorChannelRoute,
   CreatorSettingsRoute: CreatorSettingsRoute,
   CreatorStreamRoute: CreatorStreamRoute,
+  CreatorVerificationRoute: CreatorVerificationRoute,
   LiveChannelSlugRoute: LiveChannelSlugRoute,
   CreatorIndexRoute: CreatorIndexRoute,
   LiveIndexRoute: LiveIndexRoute,
@@ -412,6 +473,8 @@ const rootRouteChildren: RootRouteChildren = {
   ApiChannelsCredentialsRoute: ApiChannelsCredentialsRoute,
   ApiChannelsEnabledRoute: ApiChannelsEnabledRoute,
   ApiChannelsMineRoute: ApiChannelsMineRoute,
+  ApiIdentitySessionRoute: ApiIdentitySessionRoute,
+  ApiWebhooksDiditRoute: ApiWebhooksDiditRoute,
   ApiWebhooksMuxRoute: ApiWebhooksMuxRoute,
   ApiChannelsIndexRoute: ApiChannelsIndexRoute,
   ApiPublicChannelSlugRoute: ApiPublicChannelSlugRoute,

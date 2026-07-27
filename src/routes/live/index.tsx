@@ -1,0 +1,1 @@
+import { createFileRoute } from '@tanstack/react-router';import { LiveDirectory } from '@/components/LiveDirectory';export const Route=createFileRoute('/live/')({component:()=> <main className="page"><LiveDirectory/></main>})

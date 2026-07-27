@@ -1,0 +1,1 @@
+import { createFileRoute } from '@tanstack/react-router';import { ChannelSettings } from '@/components/ChannelSettings';export const Route=createFileRoute('/creator/channel')({component:ChannelSettings})

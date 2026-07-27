@@ -1,0 +1,1 @@
+import { createFileRoute } from '@tanstack/react-router';import { env } from '@/server/env';export const Route=createFileRoute('/api/config')({server:{handlers:{GET:()=>{const e=env();return Response.json({url:e.SUPABASE_URL,anonKey:e.SUPABASE_ANON_KEY})}}}})

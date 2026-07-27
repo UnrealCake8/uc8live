@@ -1,88 +1,85 @@
 # uc8Live
 
-uc8Live is a lightweight, multi-room LiveKit application. Creators publish over LiveKit WebRTC; unauthenticated viewers use CDN-delivered HLS when configured and retain the subscribe-only WebRTC flow as a fallback. Chat, viewer accounts, creator registration, and creator-code issuance are intentionally out of scope.
+uc8Live is a production-oriented, one-to-many livestreaming application built with TanStack Start, React, TypeScript, Tailwind CSS, Supabase, and Mux Video. Creators publish with OBS over RTMPS; viewers receive adaptive live and recorded video through Mux Player.
 
-## Creator flows
+## Architecture
 
-At `/creator/live`, **Start Room** is selected by default. It submits the normalized room name, manually issued creator code, and the explicit `create` action. The server validates the code, rejects an already-active room, creates a stream session, and issues a publish/subscribe token whose safe metadata role is `host`.
+- **TanStack Start** owns routing, SSR, API routes, and the server runtime. Public pages never import Mux management code.
+- **Supabase Auth** supports email/password and Google OAuth. The database stores profiles, channels, broadcasts, and an idempotent Mux event ledger. RLS is defense in depth; privileged server operations use the service-role client only after server authentication and role checks.
+- **Mux Video** owns RTMPS ingest, scalable playback, and automatic recordings. The server stores live-stream and playback identifiers, but never persists stream keys. Keys are fetched from Mux only for an authenticated owner with a recent sign-in.
+- **Mux webhooks** are signature-verified before validated events update channel/broadcast state. `/live` trusts this verified state—not a creator toggle.
+- The `BroadcastProvider` interface is an extension point for a future managed WebRTC bridge. It is intentionally separate from Mux playback and recording.
 
-**Join Room** submits `join`. After the same server-side code checks, the server confirms the LiveKit room exists *before* issuing a publish/subscribe token with role `guest_creator`. Joining never starts egress and a valid join is not a violation. Invalid, malformed, revoked (`REVOKED_CREATOR_CODES`), and suspended (`SUSPENDED_CREATOR_CODES`) uses are recorded by the existing server-side violation boundary with `create_room` or `join_room` context. Codes are never put in identities, metadata, URLs, storage, logs, or responses.
+## Local development
 
-Viewers need no account or authentication. Viewer WebRTC tokens are subscribe-only, cannot publish data, and are requested only when status selects WebRTC.
+Requirements: Node 22.12 or newer, npm, a Supabase project, and a Mux account.
 
-## HLS architecture
-
-The first usable creator track triggers one **LiveKit room-composite egress** using the built-in `grid` layout. This includes publishers in a useful multi-creator composition while ordinary subscribe-only viewers do not appear. It writes segmented HLS to a supported S3-compatible origin:
-
-```
-live/{normalized-room}/{random-stream-session-id}/index.m3u8
-live/{normalized-room}/{random-stream-session-id}/segment...
-```
-
-Object paths use the already validated normalized slug, never arbitrary client paths. Egress credentials remain server-side. Bunny is only the public CDN: configure a Bunny **Pull Zone** whose origin points to the origin bucket/public gateway. Bunny Storage is not assumed to be S3-compatible and Bunny Stream is not used. The playback URL is either:
-
-```
-${BUNNY_CDN_BASE_URL}/live/{room}/{session}/index.m3u8
+```bash
+npm install
+cp .env.example .env
+npm run dev
 ```
 
-or, when Bunny is disabled, the same safe path below `HLS_ORIGIN_PUBLIC_BASE_URL`.
+Run the quality suite with `npm run typecheck`, `npm run lint`, `npm test`, and `npm run build`.
 
-### Environment
+## Supabase setup
 
-```dotenv
-LIVEKIT_API_KEY=
-LIVEKIT_API_SECRET=
-NEXT_PUBLIC_LIVEKIT_URL=wss://project.livekit.cloud
-CREATOR_CODES=
-REVOKED_CREATOR_CODES=
-SUSPENDED_CREATOR_CODES=
-DEVICE_SECRET=
-HLS_ENABLED=false
-HLS_ORIGIN_ENDPOINT=
-HLS_ORIGIN_REGION=
-HLS_ORIGIN_BUCKET=
-HLS_ORIGIN_ACCESS_KEY=
-HLS_ORIGIN_SECRET_KEY=
-HLS_ORIGIN_PUBLIC_BASE_URL=
-BUNNY_CDN_ENABLED=false
-BUNNY_CDN_BASE_URL=
-HLS_MAX_CONCURRENT_STREAMS=2
-HLS_MAX_DURATION_MINUTES=180
-HLS_FALLBACK_TO_WEBRTC=true
-```
+1. Create a Supabase project and copy its project URL, anonymous key, and service-role key.
+2. Run `supabase/migrations/202607270001_mux_livestreaming.sql` with the Supabase CLI (`supabase db push`) or SQL editor.
+3. Enable email/password authentication. Optionally configure the Google provider and add `${APP_URL}/creator` to allowed redirect URLs.
+4. The migration creates new users as creators automatically, validates URL-safe unique usernames, and enables RLS. No application or creator code is required.
+5. Generate refreshed types with `supabase gen types typescript --project-id <id> > src/server/db/types.ts` after changing the schema.
 
-HLS is enabled only when `HLS_ENABLED` is exactly `true` and required storage/playback settings exist. If `BUNNY_CDN_ENABLED` is not exactly `true`, playback uses the origin public base URL. Configure the LiveKit webhook URL as `/api/livekit/webhook`; official SDK signature and payload-digest verification rejects forged events.
+## Mux setup
 
-## Origin and Bunny setup
+1. In Mux, create an API access token with **Mux Video Read and Write** permission. Set `MUX_TOKEN_ID` and `MUX_TOKEN_SECRET` only in the server environment.
+2. Create a webhook pointing to `https://your-domain.example/api/webhooks/mux` and store its signing secret as `MUX_WEBHOOK_SECRET`.
+3. Subscribe to the current Mux events handled by this app: `video.live_stream.connected`, `video.live_stream.recording`, `video.live_stream.active`, `video.live_stream.idle`, `video.live_stream.disconnected`, `video.live_stream.disabled`, `video.asset.created`, `video.asset.ready`, and `video.asset.errored`. Recording assets are related using their `live_stream_id`.
+4. Public and unlisted channels use public playback policies. Private creation is disabled in the UI until signed playback is fully configured and authorized.
 
-1. Create an origin bucket supported by LiveKit Egress's S3 output and provision least-privilege object-write credentials.
-2. Configure its endpoint, region, bucket, access key, secret, and a browser-readable public (or authenticated gateway) base URL. Do not use Bunny Storage unless an independently supported S3-compatible origin is in front of it.
-3. Create a Bunny Pull Zone pointing to that HLS origin; optionally attach a custom hostname and set `BUNNY_CDN_BASE_URL`.
-4. Serve `.m3u8` as `application/vnd.apple.mpegurl` (or `application/x-mpegURL`) and `.ts` as `video/mp2t` (and fMP4 as `video/mp4` if enabled).
-5. Allow `GET`, `HEAD`, and the uc8Live web origin with appropriate CORS response headers.
-6. Use a short cache for a master playlist, a very short/no-cache policy for the changing live media playlist, and a longer immutable cache for uniquely named segments. Never aggressively cache a live playlist.
-7. Check the account's LiveKit Egress quota. One active room consumes one composite egress; joined creators and viewers create none.
+## Environment variables
 
-## Lifecycle and fallback
+Copy `.env.example`; it deliberately contains names and blank values only.
 
-`StreamSessionStore` tracks `starting`, `live`, `ending`, `ended`, or `failed`, delivery mode, safe paths/URL, egress ID, and timestamps. This repository has no shared database, so the included global in-memory implementation is **development-only and not safe for multi-instance production**. Replace the interface with durable shared storage before scaling. The duration timer has the same single-process limitation.
+| Variable | Initial public release | Purpose |
+| --- | --- | --- |
+| `SUPABASE_URL` | Required | Supabase project URL |
+| `SUPABASE_ANON_KEY` | Required | Browser-safe authentication key |
+| `SUPABASE_SERVICE_ROLE_KEY` | Required, server only | Privileged server database access |
+| `MUX_TOKEN_ID` / `MUX_TOKEN_SECRET` | Required, server only | Mux management API |
+| `MUX_WEBHOOK_SECRET` | Required, server only | Webhook verification |
+| `APP_URL` | Required | Canonical application URL |
+| `MUX_SIGNING_KEY_ID` / `MUX_SIGNING_PRIVATE_KEY` | Optional initially | Server-generated signed playback tokens for a future private-stream rollout |
 
-HLS starts asynchronously after creator media is published, so the studio is never blocked. Duplicate starts are guarded by the session egress ID and the concurrent-stream cap. Egress events mark readiness/fallback; room completion stops egress and marks the session ended. At the duration cap, only HLS stops and the room continues in WebRTC mode. Files are retained. On configuration, quota, or provider failure, creators remain connected and safe operational logs omit provider payloads and credentials. When `HLS_FALLBACK_TO_WEBRTC` is enabled (default), viewers transparently receive subscribe-only WebRTC. With HLS disabled—recommended for local development—no Egress API is called and existing behavior is preserved.
+Never prefix service-role, Mux management, signing, or webhook secrets with `VITE_`. Production deploys should fail clearly when required values are absent.
 
-To stop an orphan manually, use LiveKit Cloud's Egress dashboard or `lk egress stop <egress-id>`, then reconcile/expire the session in the production session store. Do not expose an egress stop operation publicly.
+## OBS setup
 
-## Manual verification
+After creating a channel, open **Creator Hub → Stream Settings**, reauthenticate if requested, and reveal the details:
 
-1. Copy `.env.example` to `.env.local`, configure LiveKit/code/device values, and start with `npm run dev`.
-2. Start a unique room with a valid code; verify the host wording and camera/microphone publishing.
-3. Try Start again and verify “That room is already live. Use Join Room instead.”
-4. Join from a second device with a valid code; verify guest wording, mutual subscription, publishing, and a single Egress job.
-5. Try Join for a missing room and verify “That room is not currently live.” Test invalid/revoked codes and confirm only those attempts enter the private violation store.
-6. With HLS configured, publish media and watch status change from starting to HLS. Test native Safari and a browser using hls.js, mute/unmute, retry, full screen, PiP, orientation, and return-to-live.
-7. In LiveKit's participants view, confirm the creators and one internal room-composite participant exist but each HLS browser does **not** add a viewer participant or request `/api/token` in DevTools.
-8. Disable HLS or simulate Egress quota/storage failure; verify the creator remains connected and an unauthenticated viewer receives a subscribe-only WebRTC token.
-9. End the LiveKit room and verify egress stops, public status becomes ended, and the viewer shows the ended state. Send a forged webhook and verify HTTP 401.
+1. Open OBS Settings.
+2. Select Stream.
+3. Choose Custom service.
+4. Paste the uc8Live RTMPS server URL.
+5. Paste the private stream key.
+6. Apply settings.
+7. Press Start Streaming.
+8. Return to uc8Live and wait for the verified status to become Live.
 
-## Current limitations
+Use H.264 video, AAC audio, constant bitrate, and a two-second keyframe interval. Select an appropriate 720p or 1080p bitrate based on available upload bandwidth rather than treating one bitrate as mandatory.
 
-The development session store/rate limiter and duration timers are process-local, manifest availability is inferred from a successful egress-running event rather than origin probing, and provider quota/cost depend on the LiveKit plan. Production needs shared persistence/locking (to make the duplicate guard atomic across instances), durable scheduling, origin monitoring, and an operator-managed origin/CDN. HLS playback is delayed by several seconds and does not claim sub-second latency. HLS files are not deleted automatically.
+## Deployment
+
+Deploy the TanStack Start server output to a Node-compatible host, inject all required variables through its secret manager, set `APP_URL`, run the migration before serving traffic, then configure the public HTTPS Mux webhook URL. Do not deploy as a static-only site: authentication enforcement, Mux calls, signing, and webhooks require the server runtime.
+
+## Security notes
+
+- Mux API credentials, service-role credentials, webhook secrets, signing keys, and stream keys are never sent in initial HTML or public channel payloads.
+- Stream keys are fetched directly from Mux only after owner authorization and recent authentication; regeneration invalidates the prior key.
+- Webhooks are verified with the official SDK, recorded by unique event ID, validated, and safely ignore unsupported event types.
+- Public directory queries include only public channels; exact unlisted links work; private creation remains disabled until signed playback authorization is complete.
+- If local persistence fails after Mux creates a live stream, the service attempts to delete the orphan.
+
+## Browser broadcasting limitation
+
+Browser camera broadcasting is **not included**. Mux does not accept direct WebRTC ingest, and a camera preview must not be presented as a live broadcast. uc8Live does not send MediaRecorder chunks to Mux or proxy an unreliable browser-to-RTMP hack. A future WebRTC provider or managed bridge can implement `BroadcastProvider`; Mux will remain responsible for playback and recording.

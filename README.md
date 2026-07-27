@@ -72,6 +72,12 @@ Use H.264 video, AAC audio, constant bitrate, and a two-second keyframe interval
 
 Deploy the TanStack Start server output to a Node-compatible host, inject all required variables through its secret manager, set `APP_URL`, run the migration before serving traffic, then configure the public HTTPS Mux webhook URL. Do not deploy as a static-only site: authentication enforcement, Mux calls, signing, and webhooks require the server runtime.
 
+### Vercel
+
+The repository includes `vercel.json`, which explicitly selects Vercel's TanStack Start framework adapter. Keep the project root at the repository root and leave the Output Directory setting unset so Vercel deploys both the server handler and client assets. Setting an Output Directory such as `dist/client` turns the deployment into a static site and causes direct visits to routes such as `/live`, `/login`, and `/creator` to return a platform 404.
+
+Vercel should use `npm run build` and Node.js 22.12 or newer. After changing an existing project's framework or output settings, redeploy the latest commit so that Vercel rebuilds the server route manifest.
+
 ## Security notes
 
 - Mux API credentials, service-role credentials, webhook secrets, signing keys, and stream keys are never sent in initial HTML or public channel payloads.

@@ -74,7 +74,7 @@ Deploy the TanStack Start server output to a Node-compatible host, inject all re
 
 ### Vercel
 
-The repository includes `vercel.json`, which explicitly selects Vercel's TanStack Start framework adapter. Keep the project root at the repository root and leave the Output Directory setting unset so Vercel deploys both the server handler and client assets. Setting an Output Directory such as `dist/client` turns the deployment into a static site and causes direct visits to routes such as `/live`, `/login`, and `/creator` to return a platform 404.
+The repository includes `vercel.json`, which selects TanStack Start, and the Vite configuration includes Nitro so the build emits Vercel's server function and routing manifest instead of only the generic `dist` bundles. Keep the project root at the repository root and leave the Output Directory setting unset so Vercel deploys both the server handler and client assets. Setting an Output Directory such as `dist/client` turns the deployment into a static site and causes direct visits to routes such as `/live`, `/login`, and `/creator` to return a platform 404.
 
 Vercel should use `npm run build` and Node.js 22.12 or newer. After changing an existing project's framework or output settings, redeploy the latest commit so that Vercel rebuilds the server route manifest.
 

@@ -1,1 +1,41 @@
-{"name":"uc8live","version":"1.0.0","private":true,"scripts":{"dev":"next dev","build":"next build","start":"next start","lint":"next lint","typecheck":"tsc --noEmit","test":"vitest run"},"dependencies":{"@livekit/components-react":"^2.6.9","@livekit/components-styles":"^1.1.4","hls.js":"^1.6.16","livekit-client":"^2.8.1","livekit-server-sdk":"^2.9.6","lucide-react":"^0.468.0","next":"^14.2.21","react":"^18.3.1","react-dom":"^18.3.1"},"devDependencies":{"@types/node":"^22.10.2","@types/react":"^18.3.17","@types/react-dom":"^18.3.5","eslint":"^8.57.1","eslint-config-next":"^14.2.21","typescript":"^5.7.2","vitest":"^2.1.9"}}
+{
+  "name": "uc8live",
+  "version": "2.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite dev",
+    "build": "vite build",
+    "start": "vite preview",
+    "lint": "eslint . --max-warnings=0",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@mux/mux-node": "^14.1.1",
+    "@mux/mux-player-react": "^3.13.2",
+    "@supabase/ssr": "^0.12.3",
+    "@supabase/supabase-js": "^2.55.0",
+    "@tanstack/react-router": "^1.168.32",
+    "@tanstack/react-start": "^1.168.32",
+    "jose": "^6.0.11",
+    "lucide-react": "^0.468.0",
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1",
+    "zod": "^4.0.17"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.1.12",
+    "@types/node": "^22.10.2",
+    "@types/react": "^19.1.10",
+    "@types/react-dom": "^19.1.7",
+    "@vitejs/plugin-react": "^5.0.2",
+    "eslint": "^9.34.0",
+    "eslint-plugin-react-hooks": "^5.2.0",
+    "tailwindcss": "^4.1.12",
+    "typescript": "^5.9.2",
+    "typescript-eslint": "^8.65.0",
+    "vite": "^7.1.3",
+    "vitest": "^3.2.4"
+  }
+}

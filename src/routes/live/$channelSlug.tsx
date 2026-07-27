@@ -1,0 +1,1 @@
+import { createFileRoute } from '@tanstack/react-router';import { WatchPage } from '@/components/WatchPage';export const Route=createFileRoute('/live/$channelSlug')({component:Page});function Page(){const {channelSlug}=Route.useParams();return <WatchPage slug={channelSlug}/>}

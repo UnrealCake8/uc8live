@@ -8,6 +8,7 @@ const publicConfig = z.object({
 const required = z.object({
   SUPABASE_URL: z.url(), SUPABASE_ANON_KEY: z.string().min(1), SUPABASE_SERVICE_ROLE_KEY: z.string().min(1),
   MUX_TOKEN_ID: z.string().min(1), MUX_TOKEN_SECRET: z.string().min(1), MUX_WEBHOOK_SECRET: z.string().min(1), APP_URL: z.url(),
+  DIDIT_API_KEY: z.string().min(1), DIDIT_WEBHOOK_SECRET: z.string().min(1), DIDIT_WORKFLOW_ID: z.string().min(1),
   MUX_SIGNING_KEY_ID: z.string().min(1).optional(), MUX_SIGNING_PRIVATE_KEY: z.string().min(1).optional(),
 })
 export type PublicConfigEnv = z.infer<typeof publicConfig>
